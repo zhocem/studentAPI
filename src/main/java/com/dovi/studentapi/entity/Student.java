@@ -23,6 +23,7 @@ public class Student {
 
     @Column(name = "address_id")
     private Long addressId;
+    
 
 }
 
