@@ -1,15 +1,12 @@
 package com.dovi.studentapi.service;
 
-import com.dovi.studentapi.dto.AddressDTO;
 import com.dovi.studentapi.dto.StudentDTO;
 import com.dovi.studentapi.entity.Student;
+import com.dovi.studentapi.feignClients.AddressFeignClient;
 import com.dovi.studentapi.mapper.StudentMapper;
 import com.dovi.studentapi.repository.StudentRepository;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,12 +17,13 @@ public class StudentService {
     StudentRepository studentRepository;
     @Resource
     StudentMapper studentMapper;
-    WebClient addressWebClient;
 
-    @Autowired
-    public StudentService(StudentRepository studentRepository, WebClient addressWebClient) {
+    AddressFeignClient addressFeignClient;
+
+    public StudentService(StudentRepository studentRepository,
+                          AddressFeignClient addressFeignClient) {
         this.studentRepository = studentRepository;
-        this.addressWebClient = addressWebClient;
+        this.addressFeignClient = addressFeignClient;
     }
 
     public List<StudentDTO> getAllStudents() {
@@ -39,23 +37,15 @@ public class StudentService {
         return getStudentDTO(student);
     }
 
-
     public StudentDTO createStudent(StudentDTO studentDTO) {
         Student student = studentRepository.save(studentMapper.mapToStudent(studentDTO));
         return studentMapper.mapToStudentDTO(student);
     }
 
-    private AddressDTO getAddressById(Long id) {
-        Mono<AddressDTO> addressDTOMono = addressWebClient.get().uri("/" + id)
-                .retrieve().bodyToMono(AddressDTO.class);
-
-        return addressDTOMono.block();
-    }
 
     private StudentDTO getStudentDTO(Student student) {
         StudentDTO studentDTO = studentMapper.mapToStudentDTO(student);
-        AddressDTO addressDTO = getAddressById(student.getAddressId());
-        studentDTO.setAddressDTO(addressDTO);
+        studentDTO.setAddressDTO(addressFeignClient.getAddressById(student.getAddressId()));
         return studentDTO;
     }
 }
