@@ -2,7 +2,7 @@ package com.dovi.studentapi.service;
 
 import com.dovi.studentapi.dto.StudentDTO;
 import com.dovi.studentapi.entity.Student;
-import com.dovi.studentapi.feignClients.AddressFeignClient;
+import com.dovi.studentapi.feignClients.FeignClient;
 import com.dovi.studentapi.mapper.StudentMapper;
 import com.dovi.studentapi.repository.StudentRepository;
 import jakarta.annotation.Resource;
@@ -18,12 +18,12 @@ public class StudentService {
     @Resource
     StudentMapper studentMapper;
 
-    AddressFeignClient addressFeignClient;
+    FeignClient feignClient;
 
     public StudentService(StudentRepository studentRepository,
-                          AddressFeignClient addressFeignClient) {
+                          FeignClient feignClient) {
         this.studentRepository = studentRepository;
-        this.addressFeignClient = addressFeignClient;
+        this.feignClient = feignClient;
     }
 
     public List<StudentDTO> getAllStudents() {
@@ -45,7 +45,7 @@ public class StudentService {
 
     private StudentDTO getStudentDTO(Student student) {
         StudentDTO studentDTO = studentMapper.mapToStudentDTO(student);
-        studentDTO.setAddressDTO(addressFeignClient.getAddressById(student.getAddressId()));
+        studentDTO.setAddressDTO(feignClient.getAddressById(student.getAddressId()));
         return studentDTO;
     }
 }
