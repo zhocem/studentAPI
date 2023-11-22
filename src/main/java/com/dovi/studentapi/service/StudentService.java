@@ -1,10 +1,12 @@
 package com.dovi.studentapi.service;
 
+import com.dovi.studentapi.dto.AddressDTO;
 import com.dovi.studentapi.dto.StudentDTO;
 import com.dovi.studentapi.entity.Student;
 import com.dovi.studentapi.feignClients.FeignClient;
 import com.dovi.studentapi.mapper.StudentMapper;
 import com.dovi.studentapi.repository.StudentRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +47,12 @@ public class StudentService {
 
     private StudentDTO getStudentDTO(Student student) {
         StudentDTO studentDTO = studentMapper.mapToStudentDTO(student);
-        studentDTO.setAddressDTO(feignClient.getAddressById(student.getAddressId()));
+        studentDTO.setAddressDTO(getAddressById(student.getAddressId()));
         return studentDTO;
+    }
+
+    @CircuitBreaker(name = "addressService")
+    private AddressDTO getAddressById(long addressId) {
+        return feignClient.getAddressById(addressId);
     }
 }
