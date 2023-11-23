@@ -20,12 +20,15 @@ public class StudentService {
     @Resource
     StudentMapper studentMapper;
 
+    CommonService commonService;
     FeignClient feignClient;
 
     public StudentService(StudentRepository studentRepository,
-                          FeignClient feignClient) {
+                          FeignClient feignClient,
+                          CommonService commonService) {
         this.studentRepository = studentRepository;
         this.feignClient = feignClient;
+        this.commonService = commonService;
     }
 
     public List<StudentDTO> getAllStudents() {
@@ -47,12 +50,16 @@ public class StudentService {
 
     private StudentDTO getStudentDTO(Student student) {
         StudentDTO studentDTO = studentMapper.mapToStudentDTO(student);
-        studentDTO.setAddressDTO(getAddressById(student.getAddressId()));
+        studentDTO.setAddressDTO(commonService.getAddressById(student.getAddressId()));
         return studentDTO;
     }
 
-    @CircuitBreaker(name = "addressService")
-    private AddressDTO getAddressById(long addressId) {
-        return feignClient.getAddressById(addressId);
-    }
+//    @CircuitBreaker(name = "addressService",fallbackMethod = "fallbackGetAddressById")
+//    private AddressDTO getAddressById(long addressId) {
+//        return feignClient.getAddressById(addressId);
+//    }
+//
+//    public AddressDTO fallbackGetAddressById(long addressId, Throwable throwable){
+//        return new AddressDTO();
+//    }
 }
