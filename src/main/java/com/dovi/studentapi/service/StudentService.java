@@ -8,6 +8,8 @@ import com.dovi.studentapi.mapper.StudentMapper;
 import com.dovi.studentapi.repository.StudentRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
+    Logger logger = LoggerFactory.getLogger(StudentService.class);
 
     StudentRepository studentRepository;
     @Resource
@@ -37,6 +40,8 @@ public class StudentService {
     }
 
     public StudentDTO getStudentById(Long studentId) {
+        logger.info("Inside Student getById");
+
         Student student = studentRepository.findById(studentId).orElseThrow();
 
         return getStudentDTO(student);
@@ -54,12 +59,4 @@ public class StudentService {
         return studentDTO;
     }
 
-//    @CircuitBreaker(name = "addressService",fallbackMethod = "fallbackGetAddressById")
-//    private AddressDTO getAddressById(long addressId) {
-//        return feignClient.getAddressById(addressId);
-//    }
-//
-//    public AddressDTO fallbackGetAddressById(long addressId, Throwable throwable){
-//        return new AddressDTO();
-//    }
 }
